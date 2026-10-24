@@ -1,0 +1,331 @@
+<main class="home-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/home" aria-label="Room register home">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      <span>Room register</span>
+    </a>
+    <div class="account-actions">
+      @if (auth.isAuthenticated()) {
+        <span class="role-badge">{{ auth.currentSession()?.role }}</span>
+        <button class="sign-out" type="button" (click)="signOut()">Sign out</button>
+      } @else {
+        <a class="sign-out" routerLink="/login">Sign in</a>
+        <a class="sign-out" routerLink="/register">Register</a>
+      }
+    </div>
+  </header>
+
+  <section class="catalog" aria-labelledby="home-title">
+    <div class="catalog-heading">
+      <div>
+        <p class="eyebrow">PROPERTY MANAGEMENT</p>
+        <h1 id="home-title">Rooms</h1>
+        <p class="catalog-note">Room details, availability, amenities, and monthly rent.</p>
+      </div>
+      @if (isAdmin()) {
+        <button class="primary-button" type="button" (click)="openCreate()">
+          <span aria-hidden="true">+</span> Add room
+        </button>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="notice error-notice" role="alert">{{ errorMessage() }}</p>
+    }
+    @if (successMessage()) {
+      <p class="notice success-notice" role="status">{{ successMessage() }}</p>
+    }
+
+    @if (isAdmin()) {
+      <section class="admin-overview" aria-label="Room occupancy overview">
+        <button
+          class="overview-metric occupied-metric"
+          [class.selected]="adminRoomFilter() === 'occupied'"
+          [attr.aria-pressed]="adminRoomFilter() === 'occupied'"
+          type="button"
+          (click)="setAdminRoomFilter('occupied')"
+        >
+          <span class="metric-label">Occupied today</span>
+          <strong>{{ adminOverview()?.occupiedRoomsCount ?? 0 }}</strong>
+          <span class="metric-hint">View guest details</span>
+        </button>
+        <button
+          class="overview-metric available-metric"
+          [class.selected]="adminRoomFilter() === 'available'"
+          [attr.aria-pressed]="adminRoomFilter() === 'available'"
+          type="button"
+          (click)="setAdminRoomFilter('available')"
+        >
+          <span class="metric-label">Available today</span>
+          <strong>{{ adminOverview()?.availableRoomsCount ?? 0 }}</strong>
+          <span class="metric-hint">View available rooms</span>
+        </button>
+        <button
+          class="overview-metric total-metric"
+          [class.selected]="adminRoomFilter() === 'all'"
+          [attr.aria-pressed]="adminRoomFilter() === 'all'"
+          type="button"
+          (click)="setAdminRoomFilter('all')"
+        >
+          <span class="metric-label">Total rooms</span>
+          <strong>{{ rooms().length }}</strong>
+          <span class="metric-hint">View room register</span>
+        </button>
+      </section>
+    }
+
+    @if (isUser()) {
+      <section class="booking-section" aria-labelledby="booking-title">
+        <div class="booking-section-heading">
+          <div>
+            <p class="eyebrow">YOUR STAYS</p>
+            <h2 id="booking-title">My bookings</h2>
+          </div>
+          <span class="booking-count">{{ bookings().length }} total</span>
+        </div>
+        @if (bookingMessage()) {
+          <p class="notice success-notice" role="status">{{ bookingMessage() }}</p>
+        }
+        @if (bookingError()) {
+          <p class="notice error-notice" role="alert">{{ bookingError() }}</p>
+        }
+        @if (bookings().length === 0) {
+          <p class="no-bookings">No bookings yet. Choose dates below to check room availability.</p>
+        } @else {
+          <div class="booking-list">
+            @for (booking of bookings(); track booking.id) {
+              <article class="booking-row">
+                <div>
+                  <p class="room-kicker">ROOM {{ booking.roomNumber }}</p>
+                  <p class="booking-dates">{{ booking.checkInDate }} <span>to</span> {{ booking.checkOutDate }}</p>
+                </div>
+                <div class="booking-meta">
+                  <span class="booking-status" [class.cancelled]="booking.status === 'cancelled'">{{ booking.status }}</span>
+                  <span>{{ booking.monthlyRentAtBooking | currency:'USD':'symbol':'1.0-2' }} / month</span>
+                  @if (booking.status === 'confirmed') {
+                    <button class="text-button" type="button" (click)="cancelBooking(booking)">Cancel booking</button>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+    @if (bookingError() && !isUser()) {
+      <p class="notice error-notice" role="alert">{{ bookingError() }}</p>
+    }
+    <form class="date-picker" [formGroup]="bookingDates">
+      <div class="field">
+        <label for="check-in-date">Check-in</label>
+        <input id="check-in-date" type="date" [min]="today" formControlName="checkInDate" (change)="onBookingDatesChanged()" />
+      </div>
+      <div class="field">
+        <label for="check-out-date">Check-out</label>
+        <input id="check-out-date" type="date" [min]="today" formControlName="checkOutDate" (change)="onBookingDatesChanged()" />
+      </div>
+    </form>
+
+    @if (loading()) {
+      <p class="loading-state" role="status">Loading rooms...</p>
+    } @else if (isAdmin() && adminRoomFilter() === 'occupied') {
+      @if (adminOverviewLoading()) {
+        <p class="loading-state" role="status">Loading occupied rooms...</p>
+      } @else if ((adminOverview()?.occupiedRooms?.length ?? 0) === 0) {
+        <div class="empty-state">
+          <h2>No occupied rooms today</h2>
+          <p>Rooms with an active booking for today will appear here.</p>
+        </div>
+      } @else {
+        <div class="occupied-room-list">
+          @for (occupied of adminOverview()?.occupiedRooms ?? []; track occupied.roomId) {
+            <article class="occupied-room-row">
+              <div class="occupied-room-heading">
+                <p class="room-kicker">ROOM {{ occupied.roomNumber }} · FLOOR {{ occupied.floorNumber }}</p>
+                <h2>{{ occupied.name || occupied.roomNumber }}</h2>
+                <p class="room-capacity">Sleeps {{ occupied.capacity }}</p>
+              </div>
+              <div class="guest-details">
+                <p class="guest-heading">Current guest</p>
+                <strong>{{ occupied.guestFullName }}</strong>
+                <a [href]="'mailto:' + occupied.guestEmail">{{ occupied.guestEmail }}</a>
+                @if (occupied.guestMobileNumber) {
+                  <a [href]="'tel:' + occupied.guestMobileNumber">{{ occupied.guestMobileNumber }}</a>
+                } @else {
+                  <span class="guest-muted">No mobile number</span>
+                }
+              </div>
+              <div class="stay-details">
+                <span class="availability unavailable">Occupied</span>
+                <span>{{ occupied.checkInDate }} to {{ occupied.checkOutDate }}</span>
+                <strong>{{ occupied.monthlyRent | currency:'USD':'symbol':'1.0-2' }} / month</strong>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    } @else if (visibleRooms().length === 0) {
+      <div class="empty-state">
+        <h2>{{ adminRoomFilter() === 'available' ? 'No available rooms today' : 'No rooms yet' }}</h2>
+        <p>{{ adminRoomFilter() === 'available' ? 'Rooms with no active booking and available status will appear here.' : 'Rooms added to the register will appear here.' }}</p>
+        @if (isAdmin()) {
+          <button class="secondary-button" type="button" (click)="openCreate()">Add the first room</button>
+        }
+      </div>
+    } @else {
+      <div class="room-list">
+        @for (room of visibleRooms(); track room.id) {
+          <article class="room-row">
+            <div class="room-gallery" [class.has-photos]="room.photos.length > 0">
+              @if (room.photos.length > 0) {
+                @for (photo of room.photos; track photo.id; let first = $first) {
+                  @if (photoUrls()[photo.id]) {
+                    <div class="photo-item" [class.cover-photo]="first">
+                      <img [src]="photoUrls()[photo.id]" [alt]="'Room ' + room.roomNumber + ' photo'" />
+                      @if (isAdmin()) {
+                        <button
+                          class="photo-delete"
+                          type="button"
+                          [attr.aria-label]="'Delete photo from room ' + room.roomNumber"
+                          (click)="deletePhoto(room, photo.id)"
+                        >
+                          <span aria-hidden="true">&#215;</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                }
+              } @else {
+                <div class="photo-placeholder" aria-label="No room photo">
+                  <span aria-hidden="true">R</span>
+                </div>
+              }
+            </div>
+
+            <div class="room-details">
+              <div class="room-title-row">
+                <div>
+                  <p class="room-kicker">ROOM {{ room.roomNumber }} · FLOOR {{ room.floorNumber }}</p>
+                  <h2>{{ room.name || room.roomNumber }}</h2>
+                  <p class="room-capacity">Sleeps {{ room.capacity || 1 }}</p>
+                </div>
+                <span class="availability" [class.unavailable]="availability()[room.id] === false">
+                  {{ availability()[room.id] === null ? 'Checking dates...' : availability()[room.id] ? 'Available for dates' : 'Unavailable for dates' }}
+                </span>
+              </div>
+              <p class="room-description">{{ room.description || 'No description provided.' }}</p>
+              <div class="amenities" aria-label="Amenities">
+                @for (amenity of room.amenities; track amenity) {
+                  <span>{{ amenity }}</span>
+                } @empty {
+                  <span class="muted-amenity">No amenities listed</span>
+                }
+              </div>
+              <div class="room-footer">
+                <p class="rent"><strong>{{ room.monthlyRent | currency:'USD':'symbol':'1.0-2' }}</strong><span> / month</span></p>
+                @if (isAdmin()) {
+                  <div class="room-actions">
+                    <button class="text-button" type="button" (click)="openEdit(room)">Edit</button>
+                    <button class="danger-button" type="button" (click)="deleteRoom(room)">Delete</button>
+                  </div>
+                } @else {
+                  <div class="booking-actions">
+                    @if (availability()[room.id] === true) {
+                      @if (isUser()) {
+                        <button class="primary-button" type="button" [disabled]="bookingInProgress() === room.id" (click)="bookRoom(room)">
+                          {{ bookingInProgress() === room.id ? 'Booking...' : 'Book Now' }}
+                        </button>
+                      } @else {
+                        <a class="primary-button" routerLink="/register" [queryParams]="bookingIntentQueryParams(room.id)">Register to book</a>
+                        <a class="secondary-button" routerLink="/login" [queryParams]="bookingIntentQueryParams(room.id)">Sign in</a>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (editorOpen()) {
+    <div class="editor-layer">
+      <button class="editor-scrim" type="button" aria-label="Close room editor" (click)="closeEditor()"></button>
+      <section class="editor-panel" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+        <header class="editor-header">
+          <div>
+            <p class="eyebrow">ROOM DETAILS</p>
+            <h2 id="editor-title">{{ editingRoomId() === null ? 'Add a room' : 'Edit room' }}</h2>
+          </div>
+          <button class="icon-button" type="button" aria-label="Close editor" (click)="closeEditor()">&#215;</button>
+        </header>
+
+        <form [formGroup]="form" (ngSubmit)="saveRoom()" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="room-number">Room number</label>
+              <input id="room-number" formControlName="roomNumber" autocomplete="off" />
+              @if (form.controls.roomNumber.invalid && form.controls.roomNumber.touched) {
+                <span class="field-error">Enter a room number (30 characters max).</span>
+              }
+            </div>
+            <div class="field">
+              <label for="room-name">Display name</label>
+              <input id="room-name" formControlName="name" />
+              @if (form.controls.name.invalid && form.controls.name.touched) {
+                <span class="field-error">Enter a room name (100 characters max).</span>
+              }
+            </div>
+            <div class="field">
+              <label for="floor-number">Floor number</label>
+              <input id="floor-number" type="number" min="0" max="200" formControlName="floorNumber" />
+            </div>
+            <div class="field">
+              <label for="room-capacity">Guest capacity</label>
+              <input id="room-capacity" type="number" min="1" max="20" formControlName="capacity" />
+            </div>
+            <div class="field">
+              <label for="monthly-rent">Monthly rent</label>
+              <div class="currency-input"><span>$</span><input id="monthly-rent" type="number" min="0.01" step="0.01" formControlName="monthlyRent" /></div>
+              @if (form.controls.monthlyRent.invalid && form.controls.monthlyRent.touched) {
+                <span class="field-error">Rent must be greater than zero.</span>
+              }
+            </div>
+            <div class="field field-wide">
+              <label for="room-description">Description</label>
+              <textarea id="room-description" rows="3" maxlength="1200" formControlName="description"></textarea>
+            </div>
+            <div class="field field-wide">
+              <label for="room-amenities">Amenities</label>
+              <input id="room-amenities" formControlName="amenities" placeholder="Wi-Fi, private bath, balcony" />
+            </div>
+            <div class="field field-wide">
+              <label for="room-photos">Room photos</label>
+              <input id="room-photos" type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="selectPhotos($event)" />
+              <span class="field-hint">JPEG, PNG, or WebP. Up to 8 MB per image.</span>
+              @if (selectedPhotos().length > 0) {
+                <span class="field-hint">{{ selectedPhotos().length }} image(s) selected</span>
+              }
+            </div>
+            <label class="availability-toggle field-wide">
+              <input type="checkbox" formControlName="isAvailable" />
+              <span>Room is available</span>
+            </label>
+          </div>
+
+          @if (errorMessage()) {
+            <p class="notice error-notice" role="alert">{{ errorMessage() }}</p>
+          }
+          <div class="editor-actions">
+            <button class="secondary-button" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button>
+            <button class="primary-button" type="submit" [disabled]="saving()">
+              {{ saving() ? 'Saving...' : editingRoomId() === null ? 'Create room' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</main>

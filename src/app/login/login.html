@@ -1,0 +1,70 @@
+<main class="login-page">
+  <section class="welcome-panel" aria-label="Welcome">
+    <div class="brand-mark" aria-hidden="true">A</div>
+    <div class="welcome-copy">
+      <p class="eyebrow">ACCOUNT ACCESS</p>
+      <h1>Good to have you back.</h1>
+      <p class="welcome-note">Sign in to continue to your workspace.</p>
+    </div>
+    <p class="panel-footer">A clear view of what matters.</p>
+  </section>
+
+  <section class="form-panel" aria-labelledby="login-title">
+    <div class="form-wrap">
+      <p class="eyebrow form-eyebrow">WELCOME BACK</p>
+      <h2 id="login-title">Sign in</h2>
+      <p class="form-intro">Enter your account details to continue.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            placeholder="name@company.com"
+            [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+            [attr.aria-describedby]="form.controls.email.invalid && form.controls.email.touched ? 'email-error' : null"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="field-error" id="email-error">
+              @if (form.controls.email.hasError('required')) {
+                Enter your email address.
+              } @else {
+                Enter a valid email address.
+              }
+            </span>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+            [attr.aria-describedby]="form.controls.password.invalid && form.controls.password.touched ? 'password-error' : null"
+          />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <span class="field-error" id="password-error">Enter your password.</span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Signing in...' : 'Sign in' }}
+          <span aria-hidden="true">&#8594;</span>
+        </button>
+      </form>
+      <p class="account-prompt">New here? <a routerLink="/register" [queryParams]="bookingIntent()">Create an account</a></p>
+      <p class="security-note">Your account access is managed securely by your organization.</p>
+    </div>
+  </section>
+</main>

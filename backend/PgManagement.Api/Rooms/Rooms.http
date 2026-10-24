@@ -1,0 +1,72 @@
+@baseUrl = http://localhost:5000
+@token = replace-with-a-valid-jwt
+@roomId = 1
+@photoId = 1
+
+### Admin dashboard occupancy overview (admin JWT required)
+GET {{baseUrl}}/api/admin/rooms/overview
+Authorization: Bearer {{token}}
+
+### List rooms (signed-in users)
+GET {{baseUrl}}/api/rooms
+Authorization: Bearer {{token}}
+
+### Get one room
+GET {{baseUrl}}/api/rooms/{{roomId}}
+Authorization: Bearer {{token}}
+
+### Create a room (admin)
+POST {{baseUrl}}/api/rooms
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roomNumber": "204",
+  "name": "Garden Suite",
+  "floorNumber": 2,
+  "capacity": 2,
+  "monthlyRent": 1250.00,
+  "description": "Bright room with a private balcony.",
+  "isAvailable": true,
+  "amenities": ["Wi-Fi", "Private bath", "Balcony"]
+}
+
+### Update a room (admin)
+PUT {{baseUrl}}/api/rooms/{{roomId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "roomNumber": "204",
+  "name": "Garden Suite",
+  "floorNumber": 2,
+  "capacity": 2,
+  "monthlyRent": 1300.00,
+  "description": "Bright room with a private balcony.",
+  "isAvailable": false,
+  "amenities": ["Wi-Fi", "Private bath"]
+}
+
+### Upload a photo (admin; replace ./room.png with an image file)
+POST {{baseUrl}}/api/rooms/{{roomId}}/photos
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=RoomPhotoBoundary
+
+--RoomPhotoBoundary
+Content-Disposition: form-data; name="file"; filename="room.png"
+Content-Type: image/png
+
+< ./room.png
+--RoomPhotoBoundary--
+
+### Get a photo (signed-in users)
+GET {{baseUrl}}/api/rooms/{{roomId}}/photos/{{photoId}}
+Authorization: Bearer {{token}}
+
+### Delete a photo (admin)
+DELETE {{baseUrl}}/api/rooms/{{roomId}}/photos/{{photoId}}
+Authorization: Bearer {{token}}
+
+### Delete a room (admin)
+DELETE {{baseUrl}}/api/rooms/{{roomId}}
+Authorization: Bearer {{token}}

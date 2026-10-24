@@ -1,0 +1,98 @@
+<main class="registration-page">
+  <section class="welcome-panel" aria-label="Create account">
+    <div class="brand-mark" aria-hidden="true">R</div>
+    <div class="welcome-copy">
+      <p class="eyebrow">ROOM REGISTER</p>
+      <h1>Find a place that feels like yours.</h1>
+      <p class="welcome-note">Create an account to check room availability and manage your bookings.</p>
+    </div>
+    <p class="panel-footer">A clear view of what matters.</p>
+  </section>
+
+  <section class="form-panel" aria-labelledby="register-title">
+    <div class="form-wrap">
+      @if (registered()) {
+        <p class="eyebrow form-eyebrow">ACCOUNT CREATED</p>
+        <h2 id="register-title">You’re registered.</h2>
+        <p class="form-intro">Your account is ready. Continue to browse rooms and book a stay.</p>
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+        <a class="submit-button sign-in-link" routerLink="/login" [queryParams]="bookingIntent">Continue to sign in <span aria-hidden="true">&#8594;</span></a>
+      } @else {
+        <p class="eyebrow form-eyebrow">GET STARTED</p>
+        <h2 id="register-title">Create account</h2>
+        <p class="form-intro">Your details are used to manage room bookings.</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <div class="field">
+            <label for="full-name">Full name</label>
+            <input id="full-name" formControlName="fullName" autocomplete="name" />
+            @if (form.controls.fullName.invalid && form.controls.fullName.touched) {
+              <span class="field-error">Enter your name (2 to 150 characters).</span>
+            }
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="mobile-number">Mobile number</label>
+              <input id="mobile-number" type="tel" formControlName="mobileNumber" autocomplete="tel" />
+              @if (form.controls.mobileNumber.invalid && form.controls.mobileNumber.touched) {
+                <span class="field-error">Enter a valid mobile number.</span>
+              }
+            </div>
+            <div class="field">
+              <label for="email">Email address</label>
+              <input id="email" type="email" formControlName="email" autocomplete="email" />
+              @if (form.controls.email.invalid && form.controls.email.touched) {
+                <span class="field-error">Enter a valid email.</span>
+              }
+            </div>
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" rows="2" formControlName="address" autocomplete="street-address"></textarea>
+            @if (form.controls.address.invalid && form.controls.address.touched) {
+              <span class="field-error">Enter an address (5 to 500 characters).</span>
+            }
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="aadhaar-number">Aadhaar number (optional)</label>
+              <input id="aadhaar-number" type="password" inputmode="numeric" maxlength="12" formControlName="aadhaarNumber" autocomplete="off" />
+              @if (form.controls.aadhaarNumber.invalid && form.controls.aadhaarNumber.touched) {
+                <span class="field-error">Enter the 12-digit number.</span>
+              }
+            </div>
+            <div class="field">
+              <label for="new-password">Password</label>
+              <input id="new-password" type="password" formControlName="password" autocomplete="new-password" />
+              @if (form.controls.password.invalid && form.controls.password.touched) {
+                <span class="field-error">Use at least 12 characters.</span>
+              }
+            </div>
+          </div>
+          <div class="field">
+            <label for="profile-photo">Profile photo</label>
+            <input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp" (change)="selectPhoto($event)" />
+            <span class="field-hint">JPEG, PNG, or WebP up to 8 MB.</span>
+            @if (selectedPhoto()) {
+              <span class="field-hint">{{ selectedPhoto()?.name }}</span>
+            } @else if (form.touched) {
+              <span class="field-error">Choose a profile photo.</span>
+            }
+          </div>
+
+          <p class="privacy-note">If provided, Aadhaar is encrypted before storage. The full number is not shown in your account.</p>
+          @if (errorMessage()) {
+            <p class="form-error" role="alert">{{ errorMessage() }}</p>
+          }
+          <button class="submit-button" type="submit" [disabled]="submitting()">
+            {{ submitting() ? 'Creating account...' : 'Create account' }}
+            <span aria-hidden="true">&#8594;</span>
+          </button>
+        </form>
+        <p class="form-switch">Already registered? <a routerLink="/login" [queryParams]="bookingIntent">Sign in</a></p>
+      }
+    </div>
+  </section>
+</main>

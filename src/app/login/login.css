@@ -1,0 +1,260 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.88fr) minmax(420px, 1.12fr);
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+.welcome-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
+  overflow: hidden;
+  padding: clamp(2rem, 5vw, 5rem);
+  color: #f6f7f2;
+  background-color: #244b39;
+  background-image: linear-gradient(145deg, transparent 56%, rgb(255 255 255 / 4%) 56%),
+    repeating-linear-gradient(135deg, transparent 0 30px, rgb(255 255 255 / 3%) 30px 31px);
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 45%);
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.welcome-copy {
+  max-width: 430px;
+  margin-block: auto;
+  padding-block: 5rem;
+  animation: rise-in 500ms ease-out both;
+}
+
+.eyebrow {
+  margin: 0 0 1.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.welcome-copy .eyebrow {
+  color: #c4d8c7;
+}
+
+.welcome-copy h1 {
+  max-width: 380px;
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.6rem, 4.4vw, 4.2rem);
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.welcome-note,
+.panel-footer {
+  color: #d2dfd4;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.welcome-note {
+  margin: 1.3rem 0 0;
+}
+
+.panel-footer {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.form-panel {
+  display: grid;
+  place-items: center;
+  padding: 3rem clamp(1.5rem, 7vw, 7rem);
+}
+
+.form-wrap {
+  width: min(100%, 390px);
+  animation: rise-in 550ms 70ms ease-out both;
+}
+
+.form-eyebrow {
+  margin-bottom: 0.85rem;
+  color: var(--accent);
+}
+
+.form-wrap h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.55rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.form-intro {
+  margin: 0.75rem 0 2rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.field {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1.2rem;
+}
+
+.field label {
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.field input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  outline: none;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field input::placeholder {
+  color: #89958d;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(44 96 72 / 13%);
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.field-error,
+.form-error {
+  color: var(--error);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.form-error {
+  margin: 0 0 1rem;
+}
+
+.submit-button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.65rem;
+  padding: 0.85rem 1rem;
+  border: 0;
+  border-radius: 3px;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  font-weight: 650;
+  transition: background 150ms ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.submit-button:focus-visible {
+  outline: 3px solid #89b79a;
+  outline-offset: 3px;
+}
+
+.submit-button:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.submit-button span {
+  font-size: 1.2rem;
+}
+
+.security-note {
+  margin: 1.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-panel {
+    min-height: 220px;
+    padding: 1.5rem;
+  }
+
+  .welcome-copy {
+    padding-block: 2rem 1rem;
+  }
+
+  .welcome-copy h1 {
+    max-width: 460px;
+    font-size: 2.6rem;
+  }
+
+  .welcome-note,
+  .panel-footer {
+    display: none;
+  }
+
+  .form-panel {
+    align-items: start;
+    padding: 2.5rem 1.5rem 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.account-prompt {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.account-prompt a {
+  color: var(--accent-strong);
+  font-weight: 650;
+}

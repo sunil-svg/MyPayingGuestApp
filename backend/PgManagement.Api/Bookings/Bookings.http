@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:5000
+@token = replace-with-a-user-jwt
+@roomId = 1
+@bookingId = 1
+
+### Register an account (replace ./profile.jpg with a JPEG, PNG, or WebP file)
+POST {{baseUrl}}/api/auth/register
+Content-Type: multipart/form-data; boundary=AccountBoundary
+
+--AccountBoundary
+Content-Disposition: form-data; name="fullName"
+
+Example User
+--AccountBoundary
+Content-Disposition: form-data; name="mobileNumber"
+
++1 555 010 1234
+--AccountBoundary
+Content-Disposition: form-data; name="address"
+
+123 Main Street, Example City
+--AccountBoundary
+Content-Disposition: form-data; name="email"
+
+example-user@example.com
+--AccountBoundary
+Content-Disposition: form-data; name="aadhaarNumber"
+
+123456789012
+--AccountBoundary
+Content-Disposition: form-data; name="password"
+
+replace-with-a-12-character-or-longer-password
+--AccountBoundary
+Content-Disposition: form-data; name="profilePhoto"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./profile.jpg
+--AccountBoundary--
+
+### Check room availability without signing in
+GET {{baseUrl}}/api/rooms/{{roomId}}/availability?checkInDate=2026-11-01&checkOutDate=2026-11-05
+
+### Create a booking (user JWT required)
+POST {{baseUrl}}/api/rooms/{{roomId}}/bookings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "checkInDate": "2026-11-01",
+  "checkOutDate": "2026-11-05"
+}
+
+### List my bookings
+GET {{baseUrl}}/api/bookings
+Authorization: Bearer {{token}}
+
+### Cancel my booking
+DELETE {{baseUrl}}/api/bookings/{{bookingId}}
+Authorization: Bearer {{token}}
+
+### Read my profile photo
+GET {{baseUrl}}/api/users/me/profile-photo
+Authorization: Bearer {{token}}

@@ -1,0 +1,26 @@
+
+# .NET / ASP.NET Core
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.cache
+
+# Sensitive configuration - review before committing
+# Ignore local development settings if they contain secrets
+**/appsettings.Development.json
+secrets.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Angular generated files
+.angular/
+dist/
+node_modules/

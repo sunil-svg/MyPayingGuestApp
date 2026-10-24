@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "GiN88HXQkK+xS7xqYU3MKa2w7mFGJTCM2U5ND6YRhYU=",
+  "Source": "PgManagement.Api",
+  "BasePath": "_content/PgManagement.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
